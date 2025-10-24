@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>爱心动画</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        canvas {
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas" width="600" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        let scale = 1.0;
+        let growing = true;
+        let hue = 0;
+
+        // 动画循环
+        function animate() {
+            // 清空画布
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 缩放逻辑
+            if (growing) {
+                scale += 0.01;
+                if (scale >= 1.2) growing = false;
+            } else {
+                scale -= 0.01;
+                if (scale <= 0.8) growing = true;
+            }
+
+            // 颜色渐变（色相循环）
+            hue = (hue + 2) % 360;
+
+            // 绘制爱心
+            drawHeart();
+
+            requestAnimationFrame(animate);
+        }
+
+        // 绘制爱心（使用心形线参数方程）
+        function drawHeart() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const points = 1000;
+            const xCoords = [];
+            const yCoords = [];
+
+            for (let i = 0; i < points; i++) {
+                const t = i * 2 * Math.PI / points;
+                // 心形线公式
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+                
+                // 缩放并转换到画布坐标（Y轴反转，让爱心正立）
+                xCoords.push(centerX + x * scale * 5);
+                yCoords.push(centerY - y * scale * 5);
+            }
+
+            // 填充爱心（HSB转RGB）
+            ctx.beginPath();
+            ctx.moveTo(xCoords[0], yCoords[0]);
+            for (let i = 1; i < points; i++) {
+                ctx.lineTo(xCoords[i], yCoords[i]);
+            }
+            ctx.closePath();
+            ctx.fillStyle = `hsl(${hue}, 80%, 60%)`; // 色相、饱和度、亮度
+            ctx.fill();
+
+            // 绘制边框
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // 启动动画
+        animate();
+    </script>
+</body>
+</html>
